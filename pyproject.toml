@@ -1,0 +1,70 @@
+[tool.poetry]
+name = "pydantic-spark"
+version = "0.0.0"
+description = "Converting pydantic classes to spark schemas"
+authors = ["Peter van 't Hof' <peter.vanthof@godatadriven.com>"]
+
+keywords = ["pydantic", "spark"]
+readme = "README.md"
+license = "MIT"
+homepage = "https://github.com/godatadriven/pydantic-spark"
+repository = "https://github.com/godatadriven/pydantic-spark"
+include = [
+    "LICENSE",
+]
+
+
+packages = [{ include = "pydantic_spark", from = "src"}]
+
+[tool.poetry.dependencies]
+python = ">=3.6.1,<4.0"
+pydantic = ">=1.0.0"
+
+[tool.poetry.dev-dependencies]
+coverage= {version=  "^6.1.1", extras=["toml"]}
+pytest= "6.2.5"
+pytest-mock="3.6.1"
+pyproject-flake8 ="^0.0.1a2"
+isort ="^5.10.0"
+black="20.8b1"
+pytest-cov= "^3.0.0"
+mypy = "^0.931"
+pyspark = "^3.0.0"
+
+[tool.poetry.scripts]
+pydantic-spark = "pydantic_spark.__main__:root_main"
+
+[tool.black]
+line-length = 120
+target-version = ["py38"]
+
+[tool.pytest.ini_options]
+addopts = "--junitxml=junit/report.xml"
+testpaths = ["tests"]
+markers = "requires_database: requires postgresql"
+
+[tool.coverage.report]
+omit = ["tests/*", ".venv/*"]
+precision = 2
+show_missing = true
+
+[tool.coverage.run]
+command_line = "-m pytest -v tests/"
+omit = ["tests/*",".venv/*"]
+
+[tool.flake8]
+max-line-length = 180
+extend-exclude = ["deploy", ".venv"]
+extend-ignore = "E203"
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.mypy]
+files = "src/"
+python_version = "3.9"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

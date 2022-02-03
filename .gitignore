@@ -1,0 +1,9 @@
+.idea/
+
+junit/
+dist/
+
+__pycache__
+.pytest_cache
+
+*.iml
