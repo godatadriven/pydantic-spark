@@ -20,6 +20,13 @@ packages = [{ include = "pydantic_spark", from = "src"}]
 python = ">=3.6.1,<4.0"
 pydantic = "^1.4.0"
 
+#spark
+pyspark = {version="~3.1.2", optional=true}
+
+
+[tool.poetry.extras]
+spark = ["pyspark"]
+
 [tool.poetry.dev-dependencies]
 coverage= {version=  "^6.1.1", extras=["toml"]}
 pytest= "6.2.5"
@@ -29,7 +36,7 @@ isort ="^5.10.0"
 black="20.8b1"
 pytest-cov= "^3.0.0"
 mypy = "^0.931"
-pyspark = "^3.0.0"
+
 
 [tool.poetry.scripts]
 pydantic-spark = "pydantic_spark.__main__:root_main"
