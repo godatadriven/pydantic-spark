@@ -21,7 +21,7 @@ python = ">=3.6.1,<4.0"
 pydantic = "^1.4.0"
 
 #spark
-pyspark = {version="~3.1.2", optional=true}
+pyspark = {version=">=3.1.2,<3.3.0", optional=true}
 
 
 [tool.poetry.extras]
