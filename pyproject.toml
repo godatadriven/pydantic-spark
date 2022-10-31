@@ -21,7 +21,7 @@ python = ">=3.6.1,<4.0"
 pydantic = "^1.4.0"
 
 #spark
-pyspark = {version="~3.1.2", optional=true}
+pyspark = {version=">=3.1.2,<3.3.0", optional=true}
 
 
 [tool.poetry.extras]
@@ -29,13 +29,13 @@ spark = ["pyspark"]
 
 [tool.poetry.dev-dependencies]
 coverage= {version=  "^6.1.1", extras=["toml"]}
-pytest= "7.0.0"
+pytest= "7.0.1"
 pytest-mock="3.6.1"
 pyproject-flake8 ="^0.0.1a2"
 isort ="^5.10.0"
 black="20.8b1"
 pytest-cov= "^3.0.0"
-mypy = "^0.931"
+mypy = "^0.961"
 
 
 [tool.poetry.scripts]
