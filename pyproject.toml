@@ -34,7 +34,7 @@ pytest-mock="3.6.1"
 pyproject-flake8 ="^0.0.1a2"
 isort ="^5.10.0"
 pytest-cov= "^3.0.0"
-mypy = "^0.961"
+mypy = "^0.982"
 black = "^22.10.0"
 
 
