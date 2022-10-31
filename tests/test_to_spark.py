@@ -1,5 +1,6 @@
 import json
 from datetime import date, datetime
+from enum import Enum
 from typing import Dict, List, Optional
 from uuid import UUID
 
@@ -249,3 +250,36 @@ def test_defaults():
     # Reading schema with spark library to be sure format is correct
     schema = StructType.fromJson(result)
     assert len(schema.fields) == 1
+
+
+class StringEnumValue(str, Enum):
+    v1 = "v1"
+    v2 = "v2"
+
+
+class IntEnumValue(int, Enum):
+    v1 = 1
+    v2 = 2
+
+
+class FloatEnumValue(float, Enum):
+    v1 = 1.1
+    v2 = 2.2
+
+
+class TestEnum(SparkBase):
+    c1: StringEnumValue
+    c2: IntEnumValue
+    c3: FloatEnumValue
+
+
+def test_enum():
+    expected_schema = StructType(
+        [
+            StructField("c1", StringType(), nullable=False, metadata={"parentClass": "TestEnum"}),
+            StructField("c2", LongType(), nullable=False, metadata={"parentClass": "TestEnum"}),
+            StructField("c3", DoubleType(), nullable=False, metadata={"parentClass": "TestEnum"}),
+        ]
+    )
+    result = TestEnum.spark_schema()
+    assert result == json.loads(expected_schema.json())

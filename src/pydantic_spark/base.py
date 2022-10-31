@@ -18,15 +18,34 @@ class SparkBase(BaseModel):
         classes_seen = {}
 
         def get_definition(ref: str, schema: dict):
-            """Reading definition of base schema for nested structs"""
             id = ref.replace("#/definitions/", "")
             d = schema.get("definitions", {}).get(id)
             if d is None:
                 raise RuntimeError(f"Definition {id} does not exist")
-            return get_fields(d)
+            return d
+
+        def get_type_of_definition(ref: str, schema: dict):
+            """Reading definition of base schema for nested structs"""
+            d = get_definition(ref, schema)
+
+            if "enum" in d:
+                enum_type = d.get("type")
+                if enum_type == "string":
+                    return "string"
+                elif enum_type == "number":
+                    return "double"
+                elif enum_type == "integer":
+                    return "long"
+                else:
+                    raise RuntimeError(f"Unknown enum type: {enum_type}")
+            else:
+                return {
+                    "type": "struct",
+                    "fields": get_fields(d),
+                }
 
         def get_type(value: dict) -> Tuple[str, dict]:
-            """Returns a type of a single field"""
+            """Returns a type of single field"""
             t = value.get("type")
             f = value.get("format")
             r = value.get("$ref")
@@ -39,10 +58,7 @@ class SparkBase(BaseModel):
                 if class_name in classes_seen:
                     spark_type = classes_seen[class_name]
                 else:
-                    spark_type = {
-                        "type": "struct",
-                        "fields": get_definition(r, schema),
-                    }
+                    spark_type = get_type_of_definition(r, schema)
                     classes_seen[class_name] = spark_type
             elif t == "array":
                 items = value.get("items")
