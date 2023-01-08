@@ -18,10 +18,10 @@ packages = [{ include = "pydantic_spark", from = "src"}]
 
 [tool.poetry.dependencies]
 python = ">=3.7,<4.0"
-pydantic = "^1.4.0"
+pydantic = "^1.10.4"
 
-#spark
-pyspark = {version=">=3.1.2,<3.3.0", optional=true}
+##spark
+#pyspark = {version=">=3.1.2,<3.3.2", optional=true}
 
 
 [tool.poetry.extras]
@@ -40,6 +40,9 @@ black = "^22.10.0"
 
 [tool.poetry.scripts]
 pydantic-spark = "pydantic_spark.__main__:root_main"
+
+[tool.poetry.group.dev-dependencies.dependencies]
+pyspark = "^3.3.1"
 
 [tool.black]
 line-length = 120
