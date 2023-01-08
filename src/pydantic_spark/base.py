@@ -47,6 +47,8 @@ class SparkBase(BaseModel):
         def get_type(value: dict) -> Tuple[str, dict]:
             """Returns a type of single field"""
             t = value.get("type")
+            if not t:
+                t = 'list' if value.get('anyOf') else None
             f = value.get("format")
             r = value.get("$ref")
             a = value.get("additionalProperties")
@@ -89,6 +91,8 @@ class SparkBase(BaseModel):
                 spark_type = "long"
             elif t == "boolean":
                 spark_type = "boolean"
+            elif t == 'list':
+                spark_type = "string"
             elif t == "object":
                 if a is None:
                     value_type = "string"
@@ -102,6 +106,7 @@ class SparkBase(BaseModel):
                     f"Type '{t}' not support yet, "
                     f"please report this at https://github.com/godatadriven/pydantic-avro/issues"
                 )
+
             return spark_type, metadata
 
         def get_fields(s: dict) -> List[dict]:
