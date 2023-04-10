@@ -29,7 +29,7 @@ spark = ["pyspark"]
 
 [tool.poetry.dev-dependencies]
 coverage= {version=  "^6.1.1", extras=["toml"]}
-pytest= "7.0.1"
+pytest= "7.3.0"
 pytest-mock="3.6.1"
 pyproject-flake8 ="^0.0.1a2"
 isort ="^5.10.0"
