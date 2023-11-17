@@ -4,11 +4,14 @@ from enum import Enum
 from typing import Dict, List, Optional
 from uuid import UUID
 
+import pytest
+from pydantic import Field
 from pyspark.sql.types import (
     ArrayType,
     BooleanType,
     DateType,
     DoubleType,
+    IntegerType,
     LongType,
     MapType,
     StringType,
@@ -17,7 +20,7 @@ from pyspark.sql.types import (
     TimestampType,
 )
 
-from pydantic_spark.base import SparkBase
+from pydantic_spark.base import CoerceType, CoerceTypeError, SparkBase
 
 
 class Nested2Model(SparkBase):
@@ -283,3 +286,50 @@ def test_enum():
     )
     result = TestEnum.spark_schema()
     assert result == json.loads(expected_schema.json())
+
+
+def test_coerce_type():
+    class TestCoerceType(SparkBase):
+        c1: int = Field(json_schema_extra={"coerce_type": CoerceType.integer})
+
+    result = TestCoerceType.spark_schema()
+    assert result["fields"][0]["type"] == "integer"
+
+
+def test_coerce_type_invalid():
+    class TestCoerceType(SparkBase):
+        c1: int = Field(json_schema_extra={"coerce_type": "integer"})
+
+    with pytest.raises(CoerceTypeError):
+        TestCoerceType.spark_schema()
+
+
+class Nested2ModelCoerceType(SparkBase):
+    c111: str = Field(json_schema_extra={"coerce_type": CoerceType.integer})
+
+
+class NestedModelCoerceType(SparkBase):
+    c11: Nested2ModelCoerceType
+
+
+class ComplexTestModelCoerceType(SparkBase):
+    c1: List[NestedModelCoerceType]
+
+
+def test_coerce_type_complex_spark():
+    expected_schema = StructType(
+        [
+            StructField(
+                "c1",
+                ArrayType(StructType.fromJson(NestedModelCoerceType.spark_schema())),
+                nullable=False,
+                metadata={"parentClass": "ComplexTestModelCoerceType"},
+            )
+        ]
+    )
+    result = ComplexTestModelCoerceType.spark_schema()
+    assert result == json.loads(expected_schema.json())
+    # Reading schema with spark library to be sure format is correct
+    schema = StructType.fromJson(result)
+    assert len(schema.fields) == 1
+    assert isinstance(schema.fields[0].dataType.elementType.fields[0].dataType.fields[0].dataType, IntegerType)

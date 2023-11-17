@@ -1,6 +1,21 @@
+from enum import Enum
 from typing import List, Tuple
 
 from pydantic import BaseModel
+
+
+class CoerceType(str, Enum):
+    integer = "integer"
+    long = "long"
+    double = "double"
+    string = "string"
+    boolean = "boolean"
+    date = "date"
+    timestamp = "timestamp"
+
+
+class CoerceTypeError(Exception):
+    pass
 
 
 class SparkBase(BaseModel):
@@ -50,6 +65,8 @@ class SparkBase(BaseModel):
             f = value.get("format")
             r = value.get("$ref")
             a = value.get("additionalProperties")
+            e = value.get("json_schema_extra", {})
+            ft = e.get("coerce_type")
             metadata = {}
             if "default" in value:
                 metadata["default"] = value.get("default")
@@ -60,6 +77,10 @@ class SparkBase(BaseModel):
                 else:
                     spark_type = get_type_of_definition(r, schema)
                     classes_seen[class_name] = spark_type
+            elif ft is not None:
+                if not isinstance(ft, CoerceType):
+                    raise CoerceTypeError("coerce_type must be of type CoerceType")
+                spark_type = ft.value
             elif t == "array":
                 items = value.get("items")
                 tn, metadata = get_type(items)
