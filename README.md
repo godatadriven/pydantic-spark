@@ -30,6 +30,23 @@ schema_dict: dict = TestModel.spark_schema()
 print(json.dumps(schema_dict))
 
 ```
+#### Coerce type
+Pydantic-spark provides a `coerce_type` option that allows type coercion. 
+When applied to a field, pydantic-spark converts the column's data type to the specified coercion type. 
+
+```python
+import json
+from pydantic import Field
+from pydantic_spark.base import SparkBase, CoerceType
+
+class TestModel(SparkBase):
+    key1: str = Field(extra_json_schema={"coerce_type": CoerceType.integer})
+
+schema_dict: dict = TestModel.spark_schema()
+print(json.dumps(schema_dict))
+
+```
+
 
 ### Install for developers
 
