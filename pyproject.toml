@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pydantic-spark"
-version = "0.1.1"
+version = "0.3.0"
 description = "Converting pydantic classes to spark schemas"
 authors = ["Peter van 't Hof' <peter.vanthof@godatadriven.com>"]
 
