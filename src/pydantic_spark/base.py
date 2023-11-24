@@ -14,10 +14,6 @@ class CoerceType(str, Enum):
     timestamp = "timestamp"
 
 
-class CoerceTypeError(Exception):
-    pass
-
-
 class SparkBase(BaseModel):
     """This is base pydantic class that will add some methods"""
 
@@ -33,8 +29,8 @@ class SparkBase(BaseModel):
         classes_seen = {}
 
         def get_definition(ref: str, schema: dict):
-            id = ref.replace("#/definitions/", "")
-            d = schema.get("definitions", {}).get(id)
+            id = ref.replace("#/$defs/", "")
+            d = schema.get("$defs", {}).get(id)
             if d is None:
                 raise RuntimeError(f"Definition {id} does not exist")
             return d
@@ -47,7 +43,7 @@ class SparkBase(BaseModel):
                 enum_type = d.get("type")
                 if enum_type == "string":
                     return "string"
-                elif enum_type == "number":
+                elif enum_type == "numeric":
                     return "double"
                 elif enum_type == "integer":
                     return "long"
@@ -62,12 +58,15 @@ class SparkBase(BaseModel):
         def get_type(value: dict) -> Tuple[str, dict]:
             """Returns a type of single field"""
             t = value.get("type")
+            ao = value.get("anyOf")
             f = value.get("format")
             r = value.get("$ref")
             a = value.get("additionalProperties")
-            e = value.get("json_schema_extra", {})
-            ft = e.get("coerce_type")
+            ft = value.get("coerce_type")
             metadata = {}
+            if ao is not None:
+                t = ao[0].get("type")
+                f = ao[0].get("format")
             if "default" in value:
                 metadata["default"] = value.get("default")
             if r is not None:
@@ -78,9 +77,7 @@ class SparkBase(BaseModel):
                     spark_type = get_type_of_definition(r, schema)
                     classes_seen[class_name] = spark_type
             elif ft is not None:
-                if not isinstance(ft, CoerceType):
-                    raise CoerceTypeError("coerce_type must be of type CoerceType")
-                spark_type = ft.value
+                spark_type = ft
             elif t == "array":
                 items = value.get("items")
                 tn, metadata = get_type(items)
@@ -102,6 +99,8 @@ class SparkBase(BaseModel):
                 spark_type = "string"
                 metadata["logicalType"] = "uuid"
             elif t == "string":
+                spark_type = "string"
+            elif t == "null":
                 spark_type = "string"
             elif t == "number":
                 spark_type = "double"
@@ -129,13 +128,12 @@ class SparkBase(BaseModel):
             """Return a list of fields of a struct"""
             fields = []
 
-            required = s.get("required", [])
             for key, value in s.get("properties", {}).items():
                 spark_type, metadata = get_type(value)
                 metadata["parentClass"] = s.get("title")
                 struct_field = {
                     "name": key,
-                    "nullable": "default" not in metadata and key not in required,
+                    "nullable": "default" not in metadata and value.get("anyOf") is not None,
                     "metadata": metadata,
                     "type": spark_type,
                 }
