@@ -18,7 +18,7 @@ packages = [{ include = "pydantic_spark", from = "src"}]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<4.0"
-pydantic = "^1.4.0"
+pydantic = "^2.5.2"
 
 #spark
 pyspark = {version=">=3.1.2,<3.3.0", optional=true}

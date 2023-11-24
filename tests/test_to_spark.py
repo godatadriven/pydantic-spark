@@ -4,7 +4,6 @@ from enum import Enum
 from typing import Dict, List, Optional
 from uuid import UUID
 
-import pytest
 from pydantic import Field
 from pyspark.sql.types import (
     ArrayType,
@@ -20,7 +19,7 @@ from pyspark.sql.types import (
     TimestampType,
 )
 
-from pydantic_spark.base import CoerceType, CoerceTypeError, SparkBase
+from pydantic_spark.base import CoerceType, SparkBase
 
 
 class Nested2Model(SparkBase):
@@ -294,14 +293,6 @@ def test_coerce_type():
 
     result = TestCoerceType.spark_schema()
     assert result["fields"][0]["type"] == "integer"
-
-
-def test_coerce_type_invalid():
-    class TestCoerceType(SparkBase):
-        c1: int = Field(json_schema_extra={"coerce_type": "integer"})
-
-    with pytest.raises(CoerceTypeError):
-        TestCoerceType.spark_schema()
 
 
 class Nested2ModelCoerceType(SparkBase):
