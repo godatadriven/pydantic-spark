@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import json
 from datetime import date, datetime
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 from uuid import UUID
 
 from pydantic import Field
@@ -290,9 +292,11 @@ def test_enum():
 def test_coerce_type():
     class TestCoerceType(SparkBase):
         c1: int = Field(json_schema_extra={"coerce_type": CoerceType.integer})
+        c2: Union[str, int] = Field(json_schema_extra={"coerce_type": CoerceType.string})
 
     result = TestCoerceType.spark_schema()
     assert result["fields"][0]["type"] == "integer"
+    assert result["fields"][1]["type"] == "string"
 
 
 class Nested2ModelCoerceType(SparkBase):

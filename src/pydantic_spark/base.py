@@ -64,13 +64,18 @@ class SparkBase(BaseModel):
             a = value.get("additionalProperties")
             ft = value.get("coerce_type")
             metadata = {}
+
+            if ft is not None:
+                return ft, metadata
+
             if ao is not None:
                 if len(ao) == 2 and (ao[0].get("type") == "null" or ao[1].get("type") == "null"):
                     # this is an optional column. We will remove the null type
                     t = ao[0].get("type") if ao[0].get("type") != "null" else ao[1].get("type")
                     f = ao[0].get("format") if ao[0].get("type") != "null" else ao[1].get("format")
                 else:
-                    NotImplementedError(f"Union type {ao} is not supported yet")
+                    NotImplementedError(f"Union type {ao} is not supported yet. Use coerce_type option to specify type")
+
             if "default" in value:
                 metadata["default"] = value.get("default")
             if r is not None:
@@ -80,8 +85,6 @@ class SparkBase(BaseModel):
                 else:
                     spark_type = get_type_of_definition(r, schema)
                     classes_seen[class_name] = spark_type
-            elif ft is not None:
-                spark_type = ft
             elif t == "array":
                 items = value.get("items")
                 tn, metadata = get_type(items)
