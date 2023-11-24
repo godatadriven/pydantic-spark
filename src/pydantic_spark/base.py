@@ -65,8 +65,12 @@ class SparkBase(BaseModel):
             ft = value.get("coerce_type")
             metadata = {}
             if ao is not None:
-                t = ao[0].get("type")
-                f = ao[0].get("format")
+                if len(ao) == 2 and (ao[0].get("type") == "null" or ao[1].get("type") == "null"):
+                    # this is an optional column. We will remove the null type
+                    t = ao[0].get("type") if ao[0].get("type") != "null" else ao[1].get("type")
+                    f = ao[0].get("format") if ao[0].get("type") != "null" else ao[1].get("format")
+                else:
+                    NotImplementedError(f"Union type {ao} is not supported yet")
             if "default" in value:
                 metadata["default"] = value.get("default")
             if r is not None:
