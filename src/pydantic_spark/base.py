@@ -19,8 +19,8 @@ class SparkBase(BaseModel):
 
     @classmethod
     def spark_schema(cls) -> dict:
-        """Return the avro schema for the pydantic class"""
-        schema = cls.schema()
+        """Return the spark schema for the pydantic class"""
+        schema = cls.model_json_schema()
         return cls._spark_schema(schema)
 
     @staticmethod
@@ -59,6 +59,7 @@ class SparkBase(BaseModel):
             """Returns a type of single field"""
             t = value.get("type")
             ao = value.get("anyOf")
+            allof = value.get("allOf")
             f = value.get("format")
             r = value.get("$ref")
             a = value.get("additionalProperties")
@@ -74,7 +75,18 @@ class SparkBase(BaseModel):
                     t = ao[0].get("type") if ao[0].get("type") != "null" else ao[1].get("type")
                     f = ao[0].get("format") if ao[0].get("type") != "null" else ao[1].get("format")
                 else:
-                    NotImplementedError(f"Union type {ao} is not supported yet. Use coerce_type option to specify type")
+                    raise NotImplementedError(
+                        f"Union type {ao} is not supported yet. Use coerce_type option to specify type"
+                    )
+
+            if allof is not None:
+                # Pydantic V2 will generate allOf for Enums with a default value
+                # https://github.com/pydantic/pydantic/issues/2592
+                if len(allof) == 1:
+                    try:
+                        r = allof[0].get("$ref")
+                    except TypeError:
+                        pass
 
             if "default" in value:
                 metadata["default"] = value.get("default")

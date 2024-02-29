@@ -31,8 +31,8 @@ print(json.dumps(schema_dict))
 
 ```
 #### Coerce type
-Pydantic-spark provides a `coerce_type` option that allows type coercion. 
-When applied to a field, pydantic-spark converts the column's data type to the specified coercion type. 
+Pydantic-spark provides a `coerce_type` option that allows type coercion.
+When applied to a field, pydantic-spark converts the column's data type to the specified coercion type.
 
 ```python
 import json
@@ -40,7 +40,7 @@ from pydantic import Field
 from pydantic_spark.base import SparkBase, CoerceType
 
 class TestModel(SparkBase):
-    key1: str = Field(extra_json_schema={"coerce_type": CoerceType.integer})
+    key1: str = Field(json_schema_extra={"coerce_type": CoerceType.integer})
 
 schema_dict: dict = TestModel.spark_schema()
 print(json.dumps(schema_dict))
@@ -62,7 +62,7 @@ poetry install
 ```shell
 pytest
 coverage run -m pytest  # with coverage
-# or (depends on your local env) 
+# or (depends on your local env)
 poetry run pytest
 poetry run coverage run -m pytest  # with coverage
 ```
