@@ -89,7 +89,7 @@ class SparkBase(BaseModel):
             if "default" in value:
                 metadata["default"] = value.get("default")
             if r is not None:
-                class_name = r.replace("#/definitions/", "")
+                class_name = r.replace("#/$defs/", "")
                 if class_name in classes_seen:
                     spark_type = classes_seen[class_name]
                 else:
@@ -138,7 +138,6 @@ class SparkBase(BaseModel):
                     f"Type '{t}' not support yet, "
                     f"please report this at https://github.com/godatadriven/pydantic-avro/issues"
                 )
-            print(spark_type)
             return spark_type, metadata
 
         def get_fields(s: dict) -> List[dict]:
