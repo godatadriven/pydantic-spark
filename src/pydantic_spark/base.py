@@ -77,7 +77,8 @@ class SparkBase(BaseModel):
 
                     # if the type is an array and (has optional items),
                     # we will remove the null type and get the items
-                    items = ao[0].get("items") if ao[0].get("type") != "null" else ao[1].get("items")
+                    if not items:
+                        items = ao[0].get("items") if ao[0].get("type") != "null" else ao[1].get("items")
 
                     # if the optional type is a ref, we will prioritize it and call get_type_of_definition
                     # this will recursively resolve the types of the ref object
@@ -137,6 +138,7 @@ class SparkBase(BaseModel):
                     f"Type '{t}' not support yet, "
                     f"please report this at https://github.com/godatadriven/pydantic-avro/issues"
                 )
+            print(spark_type)
             return spark_type, metadata
 
         def get_fields(s: dict) -> List[dict]:
