@@ -75,7 +75,8 @@ class SparkBase(BaseModel):
                     t = ao[0].get("type") if ao[0].get("type") != "null" else ao[1].get("type")
                     f = ao[0].get("format") if ao[0].get("type") != "null" else ao[1].get("format")
 
-                    # if the type is an array (has items), we will remove the null type and get the items
+                    # if the type is an array and (has optional items),
+                    # we will remove the null type and get the items
                     items = ao[0].get("items") if ao[0].get("type") != "null" else ao[1].get("items")
 
                     # if the optional type is a ref, we will prioritize it and call get_type_of_definition
