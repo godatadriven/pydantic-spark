@@ -80,9 +80,9 @@ class SparkBase(BaseModel):
                     if items is None:
                         items = ao[0].get("items") if ao[0].get("type") != "null" else ao[1].get("items")
 
-                    # if the optional type is a ref, we will prioritize it and call get_type_of_definition
+                    # if the optional type is a ref, we will call get_type_of_definition
                     # this will recursively resolve the types of the ref object
-                    r = ao[0].get("$ref") if ao[0].get("$ref") is not None else ao[1].get("$ref")
+                    r = ao[0].get("$ref") if ao[0].get("type") != "null" else ao[1].get("$ref")
                 else:
                     NotImplementedError(f"Union type {ao} is not supported yet. Use coerce_type option to specify type")
 
