@@ -64,6 +64,14 @@ class ReusedObjectArray(SparkBase):
     c2: Nested2Model
 
 
+class OptionalObjectsInArray(SparkBase):
+    c1: List[Optional[Nested2Model]]
+
+
+class OptionalArrayOfArraysWithOptionalObjectsInArray(SparkBase):
+    c1: Optional[List[OptionalObjectsInArray]]
+
+
 class DefaultValues(SparkBase):
     c1: str = "test"
 
@@ -136,7 +144,6 @@ def test_spark():
 
 
 def test_reused_object():
-
     expected_schema = StructType(
         [
             StructField(
@@ -214,6 +221,43 @@ def test_complex_spark():
     # Reading schema with spark library to be sure format is correct
     schema = StructType.fromJson(result)
     assert len(schema.fields) == 5
+
+
+def test_optional_objects_in_array():
+    expected_schema = StructType(
+        [
+            StructField(
+                "c1",
+                ArrayType(elementType=StructType.fromJson(Nested2Model.spark_schema()), containsNull=True),
+                nullable=False,
+                metadata={"parentClass": "OptionalObjectsInArray"},
+            )
+        ]
+    )
+
+    result = OptionalObjectsInArray.spark_schema()
+    assert result == json.loads(expected_schema.json())
+    schema = StructType.fromJson(result)
+    assert len(schema.fields) == 1
+
+
+def test_optional_array_of_arrays_with_optional_objects_in_array():
+    expected_schema = StructType(
+        [
+            StructField(
+                "c1",
+                ArrayType(elementType=StructType.fromJson(OptionalObjectsInArray.spark_schema()), containsNull=True),
+                nullable=True,
+                metadata={"parentClass": "OptionalArrayOfArraysWithOptionalObjectsInArray"},
+            )
+        ]
+    )
+
+    result = OptionalArrayOfArraysWithOptionalObjectsInArray.spark_schema()
+
+    assert result == json.loads(expected_schema.json())
+    schema = StructType.fromJson(result)
+    assert len(schema.fields) == 1
 
 
 # def test_spark_write_complex():

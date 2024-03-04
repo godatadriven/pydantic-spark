@@ -63,6 +63,7 @@ class SparkBase(BaseModel):
             r = value.get("$ref")
             a = value.get("additionalProperties")
             ft = value.get("coerce_type")
+            items = value.get("items")
             metadata = {}
 
             if ft is not None:
@@ -73,20 +74,27 @@ class SparkBase(BaseModel):
                     # this is an optional column. We will remove the null type
                     t = ao[0].get("type") if ao[0].get("type") != "null" else ao[1].get("type")
                     f = ao[0].get("format") if ao[0].get("type") != "null" else ao[1].get("format")
+
+                    # if the type is an array and (has optional items),
+                    # we will remove the null type and get the items
+                    items = ao[0].get("items") if ao[0].get("type") != "null" else ao[1].get("items")
+
+                    # if the optional type is a ref, we will call get_type_of_definition
+                    # this will recursively resolve the types of the ref object
+                    r = ao[0].get("$ref") if ao[0].get("type") != "null" else ao[1].get("$ref")
                 else:
                     NotImplementedError(f"Union type {ao} is not supported yet. Use coerce_type option to specify type")
 
             if "default" in value:
                 metadata["default"] = value.get("default")
             if r is not None:
-                class_name = r.replace("#/definitions/", "")
+                class_name = r.replace("#/$defs/", "")
                 if class_name in classes_seen:
                     spark_type = classes_seen[class_name]
                 else:
                     spark_type = get_type_of_definition(r, schema)
                     classes_seen[class_name] = spark_type
             elif t == "array":
-                items = value.get("items")
                 tn, metadata = get_type(items)
                 spark_type = {
                     "type": "array",
